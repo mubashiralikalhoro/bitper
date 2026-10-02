@@ -1,26 +1,25 @@
 # Bitper
 
-**Private dictation in your Mac's menu bar.** Click the mic, speak, and get clean, punctuated text to copy, or press a shortcut in any app and have the text typed for you. Speak English or Urdu; the text always comes out in English.
+**Private dictation in your Mac's menu bar.** Click the mic, speak, and get the text to copy, or press a shortcut in any app and have the text typed for you. Speak English or Urdu; the text always comes out in English.
 
 Everything runs on your Mac. No account, no cloud, no subscription. Your audio never leaves the machine.
 
-![Bitper: ready, listening, and a cleaned-up result](docs/screenshot.png)
+![Bitper: ready, listening, and a transcription](docs/screenshot.png)
 
 ## Features
 
 - **One-click dictation** from the menu bar. Click the mic or press Space, speak, then click or press Space again.
-- **Clean up text:** a small local AI model removes "um", "uh", stutters and false starts ("Thursday, no wait, Friday" becomes "Friday"), fixes punctuation, and turns spoken lists into bullet points. You can turn it off.
-- **Urdu to English:** speak Urdu and Bitper writes English.
+- **Urdu to English:** speak Urdu and Bitper writes English, translated by Whisper in one step.
 - **Dictate into any app:** set a shortcut (for example ⌥Space), press it in any text field, speak, press it again, and the text is typed where your cursor is. A small floating pill shows that it's listening.
-- **History:** your last 10 dictations, with both the cleaned and the original text, ready to copy.
-- **Fast:** about 1 second from when you stop talking to finished text on Apple Silicon.
+- **History:** your last 10 dictations, ready to copy.
+- **Fast:** under a second for English and about 1–2 seconds for Urdu on Apple Silicon.
 
 ## Requirements
 
 - A Mac with Apple Silicon (M1 or newer). It also runs on Intel Macs, but slowly.
 - macOS 14 Sonoma or newer
 - [Homebrew](https://brew.sh)
-- About 2.5 GB of free disk space for the models
+- About 1 GB of free disk space for the models
 
 ## Install
 
@@ -33,8 +32,8 @@ cd bitper
 The installer:
 
 1. Checks for Xcode Command Line Tools (and starts their install if they're missing) and Homebrew.
-2. Installs [whisper.cpp](https://github.com/ggml-org/whisper.cpp) and [llama.cpp](https://github.com/ggml-org/llama.cpp) with Homebrew.
-3. Downloads the three models into `models/` (about 2 GB, one time only).
+2. Installs [whisper.cpp](https://github.com/ggml-org/whisper.cpp) with Homebrew.
+3. Downloads the two speech models into `models/` (about 700 MB, one time only).
 4. Copies the models to `~/Library/Application Support/Bitper/models`.
 5. Builds `Bitper.app`, moves it to `/Applications` and opens it.
 
@@ -57,27 +56,24 @@ To start Bitper when you log in: **System Settings → General → Login Items �
 | Dictate in the panel | Click the menu bar icon, click the mic or press **Space**, speak, press **Space** again |
 | Dictate into any app | In a text field, press your shortcut, speak, press it again. **Esc** cancels |
 | Speak Urdu | Switch **English / Urdu** at the top of the panel |
-| Copy the result | **Copy** or **⌘C**. **Show original** shows the text before cleanup |
+| Copy the result | **Copy** or **⌘C** |
 | See past dictations | **⋯ → History**, then click one to open it |
 | Change settings | **⋯ → Settings** |
 
 ## How it works
 
 ```
-mic → 16 kHz WAV → whisper.cpp → simple rules → Qwen 3.5 2B (llama.cpp) → text
-                   (speech to text,  (drop um/uh,   (punctuation, corrections,
-                    Urdu→English)     repeats)       lists; English only)
+mic → 16 kHz WAV → whisper.cpp → text
 ```
+
+Bitper records your voice and hands it to [whisper.cpp](https://github.com/ggml-org/whisper.cpp), which runs OpenAI's Whisper model on your Mac's GPU. The text Whisper returns is what you get.
 
 | Model | Size | Used for |
 |---|---|---|
 | `ggml-base.en.bin` | 148 MB | English speech |
-| `ggml-medium-q5_0.bin` | 540 MB | Urdu speech, translated to English by Whisper |
-| `Qwen3.5-2B-Q4_K_M.gguf` | 1.3 GB | Text cleanup |
+| `ggml-medium-q5_0.bin` | 540 MB | Urdu speech, translated to English |
 
-The cleanup model is told to keep your exact words and never answer or rephrase. As a safety net, if its output contains words you didn't say (for example, it answered a question you dictated), Bitper discards it and shows the plain transcript instead. The model loads while you're speaking and unloads after 5 idle minutes to free memory.
-
-These models were picked by benchmarking seven small models on messy test dictations. Smaller ones rewrote sentences, invented words or answered questions instead of cleaning them.
+**Urdu to English** happens inside Whisper itself. It was trained on speech in about 100 languages, including translating that speech straight into English. Bitper runs it with the Urdu language flag and the translate flag (`-l ur -tr`), so your Urdu goes directly to English text; it is never written in Urdu first. The medium model is used because smaller ones mistranslated common words in testing (for example "Thursday" came out as "teacher").
 
 ## Troubleshooting
 
@@ -91,7 +87,7 @@ These models were picked by benchmarking seven small models on messy test dictat
 
 **"Couldn't run whisper-cli".** Run `brew install whisper-cpp`.
 
-**Text isn't cleaned up.** Check that **Clean up text** is on in Settings, and that llama.cpp is installed (`brew install llama.cpp`).
+**Urdu comes out wrong.** Speak clearly and close to the mic. Whisper translates meaning, not word for word, and names or rare words may be misheard.
 
 ## Build from source
 

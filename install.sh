@@ -18,9 +18,7 @@ if ! command -v brew >/dev/null; then
     echo "Bitper needs Homebrew. Install it from https://brew.sh, then run ./install.sh again."
     exit 1
 fi
-for f in whisper-cpp llama.cpp; do
-    brew list "$f" >/dev/null 2>&1 && echo "✓ $f" || brew install "$f"
-done
+brew list whisper-cpp >/dev/null 2>&1 && echo "✓ whisper-cpp" || brew install whisper-cpp
 
 step "Getting models"
 mkdir -p models
@@ -32,12 +30,11 @@ fetch() { # <file> <url>
 }
 fetch ggml-base.en.bin https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.en.bin
 fetch ggml-medium-q5_0.bin https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-medium-q5_0.bin
-fetch Qwen3.5-2B-Q4_K_M.gguf https://huggingface.co/unsloth/Qwen3.5-2B-GGUF/resolve/main/Qwen3.5-2B-Q4_K_M.gguf
 
 step "Installing models"
 DEST="$HOME/Library/Application Support/Bitper/models"
 mkdir -p "$DEST"
-for f in models/*.bin models/*.gguf; do
+for f in models/*.bin; do
     [ -s "$f" ] || continue
     name=$(basename "$f")
     if [ -s "$DEST/$name" ]; then echo "✓ $name"; continue; fi

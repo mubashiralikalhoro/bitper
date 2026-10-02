@@ -1,6 +1,5 @@
 # Models are large (>100 MB); install.sh downloads them
 models/*.bin
-models/*.gguf
 models/*.part
 
 # Build output
