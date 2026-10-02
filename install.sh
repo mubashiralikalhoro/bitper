@@ -50,6 +50,12 @@ step "Installing app"
 APPS=/Applications
 [ -w "$APPS" ] || { APPS="$HOME/Applications"; mkdir -p "$APPS"; }
 pkill -x Bitper 2>/dev/null && while pgrep -x Bitper >/dev/null; do sleep 0.2; done || true
+# Older builds were ad-hoc signed; their typing permission can't carry over. Clear it so it can be granted cleanly.
+if codesign -dv "$APPS/Bitper.app" 2>&1 | grep -q "Signature=adhoc"; then
+    tccutil reset Accessibility local.bitper >/dev/null 2>&1 || true
+    tccutil reset PostEvent local.bitper >/dev/null 2>&1 || true
+    echo "Reset Bitper's typing permission. Allow it again in Bitper → ⋯ → Settings."
+fi
 rm -rf "$APPS/Bitper.app"
 mv Bitper.app "$APPS/"
 open "$APPS/Bitper.app"

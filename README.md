@@ -81,7 +81,7 @@ Bitper records your voice and hands it to [whisper.cpp](https://github.com/ggml-
 
 **"Microphone access is off".** Open **System Settings → Privacy & Security → Microphone** and turn on Bitper.
 
-**Shortcut dictation copies instead of typing.** Allow Bitper under **Privacy & Security → Accessibility**. If you rebuilt the app, macOS forgets this permission: remove Bitper from the list with **−**, then add it again.
+**Shortcut dictation copies instead of typing.** Open **⋯ → Settings → Allow…** and turn Bitper on under **Privacy & Security → Accessibility**, then quit and reopen Bitper. If it's on but still not typing, remove Bitper from the list with **−**, run `./install.sh`, and allow it again. (The build signs Bitper with a local certificate, "Bitper Local Signing", so the permission survives updates.)
 
 **"Speech model missing".** Run `./install.sh` again to download it.
 

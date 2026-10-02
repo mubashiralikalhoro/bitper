@@ -23,5 +23,21 @@ cat > "$APP/Contents/Info.plist" <<EOF
 </dict></plist>
 EOF
 "$APP/Contents/MacOS/Bitper" --selftest
-codesign --force --sign - "$APP"
+# Sign with a stable local certificate so macOS keeps the Accessibility (typing)
+# permission across rebuilds. Ad-hoc signatures change every build and lose it.
+IDENTITY="Bitper Local Signing"
+if ! security find-certificate -c "$IDENTITY" >/dev/null 2>&1; then
+    echo "Creating local signing certificate \"$IDENTITY\" (one time)"
+    tmp=$(mktemp -d)
+    /usr/bin/openssl req -x509 -newkey rsa:2048 -nodes -days 3650 -subj "/CN=$IDENTITY" \
+        -addext "extendedKeyUsage=codeSigning" -addext "keyUsage=critical,digitalSignature" \
+        -keyout "$tmp/key.pem" -out "$tmp/cert.pem" 2>/dev/null
+    /usr/bin/openssl pkcs12 -export -inkey "$tmp/key.pem" -in "$tmp/cert.pem" -out "$tmp/id.p12" -passout pass:bitper
+    security import "$tmp/id.p12" -k "$HOME/Library/Keychains/login.keychain-db" -P bitper -T /usr/bin/codesign >/dev/null
+    rm -rf "$tmp"
+fi
+codesign --force --sign "$IDENTITY" "$APP" 2>/dev/null || {
+    echo "Warning: signing with \"$IDENTITY\" failed; using an ad-hoc signature (typing permission resets on each build)."
+    codesign --force --sign - "$APP"
+}
 echo "Built $APP — run: open $APP"
