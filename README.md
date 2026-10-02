@@ -10,7 +10,7 @@ Everything runs on your Mac. No account, no cloud, no subscription. Your audio n
 
 - **One-click dictation** from the menu bar. Click the mic or press Space, speak, then click or press Space again.
 - **Urdu to English:** speak Urdu and Bitper writes English, translated by Whisper in one step.
-- **Dictate into any app:** set a shortcut (for example ⌥Space), press it in any text field, speak, press it again, and the text is typed where your cursor is. A small floating pill shows that it's listening.
+- **Dictate into any app:** set a shortcut (for example ⌥Space), press it in any text field, speak, then press **Space** to stop, and the text is typed where your cursor is. A small floating pill shows that it's listening.
 - **History:** your last 10 dictations, ready to copy.
 - **Fast:** under a second for English and about 1–2 seconds for Urdu on Apple Silicon.
 
@@ -54,7 +54,7 @@ To start Bitper when you log in: **System Settings → General → Login Items �
 | To | Do this |
 |---|---|
 | Dictate in the panel | Click the menu bar icon, click the mic or press **Space**, speak, press **Space** again |
-| Dictate into any app | In a text field, press your shortcut, speak, press it again. **Esc** cancels |
+| Dictate into any app | In a text field, press your shortcut, speak, press **Space** to stop. **Esc** cancels |
 | Speak Urdu | Switch **English / Urdu** at the top of the panel |
 | Copy the result | **Copy** or **⌘C** |
 | See past dictations | **⋯ → History**, then click one to open it |

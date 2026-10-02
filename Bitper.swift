@@ -232,6 +232,7 @@ final class Recorder: ObservableObject {
     @Published private(set) var note: (text: String, ok: Bool)?
     private var mainKey: HotKey?
     private var escKey: HotKey?
+    private var spaceKey: HotKey?
     private var noteID = 0
     private let hud = HUD()
 
@@ -383,16 +384,19 @@ final class Recorder: ObservableObject {
         mainKey = HotKey(keyCode: s.keyCode, mods: s.carbonMods, id: 1) { [weak self] in self?.shortcutPressed() }
     }
 
+    /// The shortcut only starts recording; Space stops it (see sessionChanged).
     private func shortcutPressed() {
-        switch phase {
-        case .listening: viaShortcut = true; finish()
-        case .transcribing: break
-        default: viaShortcut = true; start()
-        }
+        guard !phase.busy else { return }
+        viaShortcut = true
+        start()
     }
 
     /// Drives the floating pill and the final typing for shortcut sessions.
     private func sessionChanged() {
+        // Space is claimed system-wide only while a shortcut session is listening, so normal typing is untouched otherwise.
+        spaceKey = viaShortcut && phase == .listening
+            ? spaceKey ?? HotKey(keyCode: 49, mods: 0, id: 3) { [weak self] in self?.finish() }
+            : nil
         guard viaShortcut else { escKey = nil; hud.hide(); return }
         switch phase {
         case .listening, .transcribing:
@@ -827,7 +831,7 @@ struct SettingsView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 18) {
                 SettingsGroup(header: "Dictate into any app",
-                        footer: "In any text field, press your shortcut and speak. Press it again and the text is typed where your cursor is.") {
+                        footer: "In any text field, press your shortcut and speak. Press Space to stop, and the text is typed where your cursor is.") {
                     Row(title: "Shortcut") { ShortcutField(r: r) }
                     Divider().padding(.leading, 12)
                     Row(title: "Typing") {
@@ -1019,7 +1023,7 @@ struct HUDView: View {
 
     private var detail: String? {
         guard r.note == nil else { return nil }
-        if r.phase == .listening { return "\(r.shortcut?.display ?? "Shortcut") to finish · Esc to cancel" }
+        if r.phase == .listening { return "Space to finish · Esc to cancel" }
         return "Text goes where your cursor was."
     }
 }
